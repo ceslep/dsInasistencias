@@ -61,13 +61,16 @@
   };
 
   const estudianteClick = (e) => {
-    open=false;
+   
     console.log(e.detail.data)
     estudiante=e.detail.data;
     open=true;
   };
 
-  
+  const closeModal = (e)=>{
+    open= false;
+
+  }
 </script>
 
 <div class="d-flex justify-content-center">
@@ -122,4 +125,4 @@
   {cargandoEstudiantes}
   on:dataEstudiante={estudianteClick}
 />
-<ModalInasistencia {open} {estudiante}/>
+<ModalInasistencia {open} {estudiante} consultando={!open} on:close={closeModal}/>
