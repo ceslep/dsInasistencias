@@ -1,11 +1,16 @@
 <script>
+  import ListadoEstudiantes from "./ListadoEstudiantes.svelte";
   import { onMount } from "svelte";
   import { urlPhp, iColegio } from "../Stores";
-
+  import Swal from "sweetalert2";
+  import ModalInasistencia from "./ModalInasistencia.svelte";
+  
   let grados = [];
   let grupos = [];
   let estudiantes = [];
-  let cargandoEstudiantes=false;
+  let open;
+  let estudiante;
+  let cargandoEstudiantes = false;
   let datosFiltrarEstudiantes = {
     igrado: "",
     igrupo: "",
@@ -17,7 +22,7 @@
 
   const obtenerGrados = async () => {
     grados = [];
-    estudiantes=[];
+    estudiantes = [];
     let response = await fetch(
       `${$urlPhp}obtenerGrados.php?icolegio=${$iColegio}`
     );
@@ -26,7 +31,7 @@
 
   const obtenerGrupos = async () => {
     grupos = [];
-    estudiantes=[];
+    estudiantes = [];
     let response = await fetch(`${$urlPhp}obtenerGrupos.php`, {
       method: "POST",
       body: JSON.stringify({
@@ -40,7 +45,7 @@
   };
 
   const obtenerEstudiantes = async () => {
-    cargandoEstudiantes=true;
+    cargandoEstudiantes = true;
     let response = await fetch(`${$urlPhp}obtenerEstudiantes.php`, {
       method: "POST",
       body: JSON.stringify({
@@ -52,8 +57,17 @@
       mode: "cors",
     });
     estudiantes = await response.json();
-    cargandoEstudiantes=false;
+    cargandoEstudiantes = false;
   };
+
+  const estudianteClick = (e) => {
+    open=false;
+    console.log(e.detail.data)
+    estudiante=e.detail.data;
+    open=true;
+  };
+
+  
 </script>
 
 <div class="d-flex justify-content-center">
@@ -102,19 +116,10 @@
       </form>
     </div>
   </div>
-  
 </div>
-<div class="container d-flex justify-content-center pt-3">
-  {#if estudiantes.length > 0 }
-    <ul class="list-group pt-2">
-      {#each estudiantes as { nestudiante }}
-        <li class="list-group-item"><a href="#!">{nestudiante}</a></li>
-      {/each}
-    </ul>
-  {:else if cargandoEstudiantes }
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-  {/if}
-</div>
-
+<ListadoEstudiantes
+  {estudiantes}
+  {cargandoEstudiantes}
+  on:dataEstudiante={estudianteClick}
+/>
+<ModalInasistencia {open} {estudiante}/>
