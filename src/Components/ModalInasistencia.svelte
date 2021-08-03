@@ -26,7 +26,13 @@
     });
   }
 
-  
+  let inasistencia={
+    codigo:"",
+    imateria:"",
+    horas:"",
+    fecha:"",
+    excusa:false
+  }
 
 
   const obtenerMaterias = async () => {
@@ -50,10 +56,13 @@
    moment.locale('es-CO');
   });
   afterUpdate(()=>{
-    fechahora=moment().format("YYYY-MM-DD");
-    console.log(fechahora);
-   obtenerMaterias();
+    inasistencia.fecha=moment().format("YYYY-MM-DD");
+     obtenerMaterias();
   });
+
+  $:if(estudiante) inasistencia.codigo=estudiante.codigo;
+
+  $:console.log(inasistencia);
 </script>
 
 <div>
@@ -66,7 +75,7 @@
       <Alert color="primary">
         <div class="form-control">
           <label for="materia">Materia</label>
-          <select class="custom-select w-100">
+          <select class="custom-select w-100" bind:value={inasistencia.imateria}>
             <option value=""></option>
             {#each materias as {imateria}}
                <option value="{imateria}">{imateria}</option>
@@ -75,7 +84,7 @@
         </div>
         <div class="form-control">
           <label for="materia">Horas de inasistencia</label>
-          <select class="custom-select w-100">
+          <select class="custom-select w-100" bind:value={inasistencia.horas}>
             <option value=""></option>
             {#each [1,2,3,4,5] as hora}
                <option value="{hora}">{hora}</option>
@@ -89,11 +98,11 @@
           name="datetime"
           id="exampleDatetime"
           placeholder="datetime placeholder"
-          bind:value={fechahora}
+          bind:value={inasistencia.fecha}
         />
         </div>
         <div class="form-check form-switch pt-2">
-          <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+          <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" bind:checked={inasistencia.excusa}>
           <label class="form-check-label" for="flexSwitchCheckDefault">Con excusa</label>
         </div>
       </Alert>
