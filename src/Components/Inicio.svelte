@@ -2,7 +2,6 @@
   import ListadoEstudiantes from "./ListadoEstudiantes.svelte";
   import { onMount } from "svelte";
   import { urlPhp, iColegio } from "../Stores";
-  import Swal from "sweetalert2";
   import ModalInasistencia from "./ModalInasistencia.svelte";
   
   let grados = [];
@@ -15,12 +14,15 @@
     igrado: "",
     igrupo: "",
   };
+  let validForm=false;
+  let classBtn="btn btn-primary";
 
   onMount(async () => {
     grados = await obtenerGrados();
   });
 
   const obtenerGrados = async () => {
+   
     grados = [];
     estudiantes = [];
     let response = await fetch(
@@ -32,6 +34,8 @@
   const obtenerGrupos = async () => {
     grupos = [];
     estudiantes = [];
+    cargandoEstudiantes=false;
+    if (datosFiltrarEstudiantes.igrado!=""){
     let response = await fetch(`${$urlPhp}obtenerGrupos.php`, {
       method: "POST",
       body: JSON.stringify({
@@ -42,6 +46,7 @@
       mode: "cors",
     });
     grupos = await response.json();
+  }
   };
 
   const obtenerEstudiantes = async () => {
@@ -71,6 +76,8 @@
     open= false;
 
   }
+
+  $:validForm=datosFiltrarEstudiantes.igrado!="" && datosFiltrarEstudiantes.igrupo!="";
 </script>
 
 <div class="d-flex justify-content-center">
@@ -111,7 +118,7 @@
         </div>
         <div class="d-grid gap-1 pt-3">
           <button
-            class="btn btn-primary"
+            class="{!validForm?"disabled "+classBtn:classBtn}"
             type="button"
             on:click={obtenerEstudiantes}>Ver</button
           >
@@ -120,9 +127,11 @@
     </div>
   </div>
 </div>
+{#if !cargandoEstudiantes}
 <ListadoEstudiantes
   {estudiantes}
   {cargandoEstudiantes}
   on:dataEstudiante={estudianteClick}
 />
+{/if}
 <ModalInasistencia {open} {estudiante} consultando={!open} on:close={closeModal}/>

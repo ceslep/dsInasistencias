@@ -1,0 +1,11 @@
+POST http://127.0.0.1/datosoft/dsInasistencias/public/php/guardarInasistencia.php
+content-type: application/json
+
+{
+    "codigo": "1087546265",
+    "excusa": true,
+    "fecha": "2021-08-03",
+    "horas": 4,
+    "imateria": "Matemati"
+}
+
