@@ -3,26 +3,28 @@
   import { onMount } from "svelte";
   import { urlPhp, iColegio } from "../Stores";
   import ModalInasistencia from "./ModalInasistencia.svelte";
-  
+  import {ClipboardData,Eye} from "svelte-bootstrap-icons";
+  import {Spinner} from "sveltestrap";
   let grados = [];
   let grupos = [];
   let estudiantes = [];
   let open;
   let estudiante;
   let cargandoEstudiantes = false;
+  let cargando=false;
+  let cargandoGrupos=false;
   let datosFiltrarEstudiantes = {
     igrado: "",
     igrupo: "",
   };
-  let validForm=false;
-  let classBtn="btn btn-primary";
+  let validForm = false;
+  let classBtn = "btn btn-primary w-100";
 
   onMount(async () => {
     grados = await obtenerGrados();
   });
 
   const obtenerGrados = async () => {
-   
     grados = [];
     estudiantes = [];
     let response = await fetch(
@@ -34,23 +36,26 @@
   const obtenerGrupos = async () => {
     grupos = [];
     estudiantes = [];
-    cargandoEstudiantes=false;
-    if (datosFiltrarEstudiantes.igrado!=""){
-    let response = await fetch(`${$urlPhp}obtenerGrupos.php`, {
-      method: "POST",
-      body: JSON.stringify({
-        icolegio: $iColegio,
-        igrado: datosFiltrarEstudiantes.igrado,
-      }),
-      headers: { "Content-Type": "application/json" },
-      mode: "cors",
-    });
-    grupos = await response.json();
-  }
+    cargandoEstudiantes = false;
+    cargandoGrupos=true;
+    if (datosFiltrarEstudiantes.igrado != "") {
+      let response = await fetch(`${$urlPhp}obtenerGrupos.php`, {
+        method: "POST",
+        body: JSON.stringify({
+          icolegio: $iColegio,
+          igrado: datosFiltrarEstudiantes.igrado,
+        }),
+        headers: { "Content-Type": "application/json" },
+        mode: "cors",
+      });
+      grupos = await response.json();
+      cargandoGrupos=false;
+    }
   };
 
   const obtenerEstudiantes = async () => {
     cargandoEstudiantes = true;
+    cargando=true;
     let response = await fetch(`${$urlPhp}obtenerEstudiantes.php`, {
       method: "POST",
       body: JSON.stringify({
@@ -63,21 +68,22 @@
     });
     estudiantes = await response.json();
     cargandoEstudiantes = false;
+    cargando=false;
   };
 
   const estudianteClick = (e) => {
-   
-    console.log(e.detail.data)
-    estudiante=e.detail.data;
-    open=true;
+    console.log(e.detail.data);
+    estudiante = e.detail.data;
+    open = true;
   };
 
-  const closeModal = (e)=>{
-    open= false;
+  const closeModal = (e) => {
+    open = false;
+  };
 
-  }
-
-  $:validForm=datosFiltrarEstudiantes.igrado!="" && datosFiltrarEstudiantes.igrupo!="";
+  $: validForm =
+    datosFiltrarEstudiantes.igrado != "" &&
+    datosFiltrarEstudiantes.igrupo != "";
 </script>
 
 <div class="d-flex justify-content-center">
@@ -99,6 +105,7 @@
                   <option value={igrado}>{igrado}</option>
                 {/each}
               </select>
+              
             </div>
           </div>
           <div class="col-6">
@@ -113,25 +120,49 @@
                   <option value={igrupo}>{igrupo}</option>
                 {/each}
               </select>
+              {#if cargandoGrupos}
+              <Spinner size="sm"/>
+              {/if}
             </div>
           </div>
         </div>
         <div class="d-grid gap-1 pt-3">
-          <button
-            class="{!validForm?"disabled "+classBtn:classBtn}"
-            type="button"
-            on:click={obtenerEstudiantes}>Ver</button
-          >
+          <div class="row">
+            <div class="col">
+              <button
+                class={!validForm ? "disabled " + classBtn : classBtn}
+                type="button"
+                on:click={obtenerEstudiantes}><Eye style="color:aqua;"/><span class="ms-2">Ver</span>
+                {#if cargando}
+                <Spinner size="sm"/>
+                {/if}
+                </button
+              >
+            </div>
+            <div class="col">
+              <button
+                class="btn btn-secondary  w-100"
+                type="button"
+                on:click={obtenerEstudiantes}><ClipboardData style="color:yellow;"/><span class="ms-2">Resumen</span></button
+              >
+            </div>
+          </div>
         </div>
       </form>
     </div>
   </div>
 </div>
 {#if !cargandoEstudiantes}
-<ListadoEstudiantes
-  {estudiantes}
-  {cargandoEstudiantes}
-  on:dataEstudiante={estudianteClick}
-/>
+  <ListadoEstudiantes
+    {estudiantes}
+    {cargandoEstudiantes}
+    on:dataEstudiante={estudianteClick}
+  />
 {/if}
-<ModalInasistencia {open} {estudiante} consultando={!open} on:close={closeModal}/>
+<ModalInasistencia
+  {open}
+  {estudiante}
+  consultando={!open}
+  on:close={closeModal}
+/>
+

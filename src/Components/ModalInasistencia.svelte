@@ -41,6 +41,7 @@
   let inasistencia = {
     codigo: "",
     imateria: "",
+    periodo:"",
     horas: "",
     fecha: "",
     excusa: false,
@@ -74,7 +75,7 @@
 
   $: console.log(inasistencia);
 
-  $: validForm = inasistencia.imateria != "" && inasistencia.horas != "" ;
+  $: validForm = inasistencia.imateria != "" && inasistencia.horas != "" && inasistencia.periodo!="" ;
 
   const guardar = async () => {
     guardando = true;
@@ -111,7 +112,7 @@
 <div>
   <Modal isOpen={open} on:close={closeModal} on:open={openModal}>
     <ModalHeader
-      >{estudiante.nestudiante}<br />Cod:{estudiante.codigo}</ModalHeader
+      >{estudiante.nestudiante}</ModalHeader
     >
     <ModalBody>
       <Alert color="primary">
@@ -133,6 +134,15 @@
             <option value="" />
             {#each [1, 2, 3, 4, 5] as hora}
               <option value={hora}>{hora}</option>
+            {/each}
+          </select>
+        </div>
+        <div class="form-control">
+          <label for="materia">Período</label>
+          <select class="custom-select w-100" bind:value={inasistencia.periodo}>
+            <option value="" />
+            {#each ['PRIMER', 'SEGUNDO', 'TERCERO', 'CUARTO'] as periodo}
+              <option value={periodo}>{periodo}</option>
             {/each}
           </select>
         </div>
