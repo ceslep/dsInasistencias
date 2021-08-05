@@ -11,6 +11,7 @@
   let open;
   let estudiante;
   let cargandoEstudiantes = false;
+  let cargandoGrados=false;
   let cargando=false;
   let cargandoGrupos=false;
   let datosFiltrarEstudiantes = {
@@ -27,10 +28,14 @@
   const obtenerGrados = async () => {
     grados = [];
     estudiantes = [];
+    cargandoGrados=true;
+    let data;
     let response = await fetch(
       `${$urlPhp}obtenerGrados.php?icolegio=${$iColegio}`
     );
-    return await response.json();
+    data = await response.json();
+    cargandoGrados=false;
+    return data;
   };
 
   const obtenerGrupos = async () => {
@@ -102,10 +107,12 @@
               >
                 <option value="" />
                 {#each grados as { igrado }}
-                  <option value={igrado}>{igrado}</option>
+                  <option data-tokens={igrado} value={igrado}>{igrado}</option>
                 {/each}
               </select>
-              
+              {#if cargandoGrados}
+              <Spinner size="sm"/>
+              {/if}
             </div>
           </div>
           <div class="col-6">

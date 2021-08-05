@@ -1,11 +1,14 @@
 <script>
+	import ModalResumen from './ModalResumen.svelte';
   import { afterUpdate, createEventDispatcher, onMount } from "svelte";
   import {PersonLinesFill,BarChartLine} from "svelte-bootstrap-icons";
-  import ModalResumen from "ModalResumen.svelte";
+  
   export let estudiantes;
  
   let txtBusqueda="";
   let estudiantesLocal;
+  let openMR=false;
+  let estudianteResumen;
   const dispatch = createEventDispatcher();
   //export let cargandoEstudiantes;
   const clickEstudiante = (estudiante) => {
@@ -34,11 +37,16 @@
       estudiantesLocal=estudiantes;
     });
  
-    const openModalResumen = ()=>{
-
+    const openModalResumen = (estudiante)=>{
+      estudianteResumen=estudiante;
+      openMR=true;
     }
 
   $: buscarEstudiante(txtBusqueda);
+
+  const closeModal = (e) => {
+    openMR = false;
+  };
 </script>
 
 <div class="container-fluid d-flex justify-content-center flex-column pt-3">
@@ -56,7 +64,7 @@
               clickEstudiante(estudiante);
             }}>{estudiante.nestudiante}</a
           >
-          <button class="btn btn-outline-primary btn-sm float-end" on:click={openModalResumen}>
+          <button class="btn btn-outline-primary btn-sm float-end" on:click={()=>openModalResumen(estudiante)}>
             <BarChartLine style="color:orange;"/>
           </button>
         </li>
@@ -66,12 +74,18 @@
   {/if}
 </div>
 
-<ModalResumen/>
+<ModalResumen  
+open={openMR}
+on:close={closeModal}
+{estudianteResumen}
+/>
+
+
+
 
 <style>
   .gradiente {
-   
-    background: linear-gradient(to right, #E2E2E2, #C9D6FF);
+      background: linear-gradient(to right, #E2E2E2, #C9D6FF);
   }
 
   

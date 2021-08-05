@@ -6,7 +6,7 @@
     $icolegio=$datos->icolegio;
     $igrado=$datos->igrado;
     $igrupo=$datos->igrupo;
-    $sql="select estudiantes from estudiantes"; 
+    $sql="select * from estudiantes"; 
     $sql.=" where 1=1";
     $sql.=" and icolegio='$icolegio'";
     $sql.=" and igrado='$igrado'";

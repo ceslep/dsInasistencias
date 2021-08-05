@@ -10,7 +10,8 @@
     Alert,
     Input,
     Spinner,
-  } from "sveltestrap";
+     } from "sveltestrap";
+  import {FilePlus} from "svelte-bootstrap-icons";   
   import moment from "moment";
   import Swal from "sweetalert2";
   export let open = false;
@@ -112,6 +113,7 @@
 <div>
   <Modal isOpen={open} on:close={closeModal} on:open={openModal}>
     <ModalHeader
+    class="bg-primary p-2 text-white bg-opacity-10"
       >{estudiante.nestudiante}</ModalHeader
     >
     <ModalBody>
@@ -173,7 +175,9 @@
       <div
         on:click={guardar}
         class={!validForm ? "disabled "+classBtn : classBtn}
-        >Guardar
+        >
+        <FilePlus/>
+        Guardar
         {#if guardando}
           <Spinner size="sm" class="ms-2" />
         {/if}
