@@ -68,7 +68,7 @@
     moment.locale("es-CO");
   });
   afterUpdate(() => {
-    inasistencia.fecha = moment().format("YYYY-MM-DD");
+    //inasistencia.fecha = moment().format("YYYY-MM-DD");
     obtenerMaterias();
   });
 
