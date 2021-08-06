@@ -6,7 +6,7 @@
 const valores = window.location.search;
 const urlParams = new URLSearchParams(valores);
 $docente = urlParams.get('docente');
-$iColegio=urlParams.get('icolegio');
+//$iColegio=urlParams.get('icolegio');
 
 </script>
 

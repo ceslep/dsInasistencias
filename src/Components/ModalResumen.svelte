@@ -9,7 +9,7 @@
         Table,
         Tooltip,
     } from "sveltestrap";
-    import { DoorClosed } from "svelte-bootstrap-icons";
+    import { DoorClosed,Trash } from "svelte-bootstrap-icons";
     import { urlPhp, iColegio } from "../Stores";
     export let open = false;
     export let estudianteResumen;
@@ -81,15 +81,16 @@
         inasist.forEach((inas) => {
             html += `
             <tr>
-                    <td class='text-light'>
-                        ${inas.fecha}
+                    <td class='text-light align-middle'>
+                        ${inas.fecha.substring(5,10)}
                     </td>
                     <td class='' style='color:yellow;'>
                         ${inas.horas} Horas
                     </td>
-                    <td class='text-light'>
+                    <td class="${inas.excusa=='t'?'text-success':'text-light'}">
                         ${inas.excusa=="t"?"Excusa":"Sin excusa"}
                     </td>
+                    
             </tr>
            `;
         });
@@ -97,6 +98,19 @@
 
         return html;
     };
+
+    const Total = (materia)=>{
+       return inasistencias.map(inasistencia=>{
+           if (inasistencia.imateria===materia){
+           if (inasistencia.horas){
+           return parseInt(inasistencia.horas);
+        }
+        }else return 0;
+        }).reduce((T,horas)=>{
+            return T+horas;
+        });
+      
+    }
 </script>
 
 <Modal
@@ -117,6 +131,9 @@
                     {#each columnas as periodo}
                         <th class="text-center text-success">{periodo}</th>
                     {/each}
+                    <th class="text-center text-primary">
+                        TOTAL
+                    </th>
                 {/if}
             </thead>
             <tbody>
@@ -132,6 +149,7 @@
                                     <Tooltip
                                         target={materia + periodo}
                                         placement="right"
+                                        title="<em>Tooltip</em> <u>with</u> <b>HTML</b>"
                                     >
                                         {@html htmlInasistencia(
                                             materia,
@@ -140,6 +158,9 @@
                                     </Tooltip>
                                 </td>
                             {/each}
+                            <td class="text-center text-dark">
+                                {Total(materia)}
+                            </td>
                         </tr>
                     {/each}
                 {/if}
@@ -153,3 +174,5 @@
         </Button>
     </ModalFooter>
 </Modal>
+
+<ModalReportePeriodo/>

@@ -74,7 +74,7 @@
 
   $: if (estudiante) inasistencia.codigo = estudiante.codigo;
 
-  $: console.log(inasistencia);
+ 
 
   $: validForm = inasistencia.imateria != "" && inasistencia.horas != "" && inasistencia.periodo!="" ;
 

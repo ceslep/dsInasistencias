@@ -19,8 +19,7 @@
 
   
   const buscarEstudiante= async (crit)=>{
-    console.log(crit);
-    console.log(estudiantes);
+  
         let estudiantesFilter;
         if (crit.length>2){
         estudiantesFilter=estudiantes.filter(estudiante=>{
@@ -33,7 +32,7 @@
     }
 
     onMount(()=>{
-      console.log(estudiantes);
+      
       estudiantesLocal=estudiantes;
     });
  
