@@ -1,7 +1,7 @@
 <script>
   import ListadoEstudiantes from "./ListadoEstudiantes.svelte";
   import { onMount } from "svelte";
-  import { urlPhp, iColegio } from "../Stores";
+  import { urlPhp, iColegio,docente } from "../Stores";
   import ModalInasistencia from "./ModalInasistencia.svelte";
   import {ClipboardData,Eye} from "svelte-bootstrap-icons";
   import {Spinner} from "sveltestrap";
@@ -93,7 +93,7 @@
 
 <div class="d-flex justify-content-center">
   <div class="card" style="width: 22rem;">
-    <div class="card-header bg-secondary text-light">Ingresar</div>
+    <div class="card-header bg-secondary text-light">Ingresar {$docente} {$iColegio}</div>
     <div class="card-body">
       <form>
         <div class="row">

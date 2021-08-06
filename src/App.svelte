@@ -1,6 +1,12 @@
-<script lang="ts">
-import Inicio from "./Components/Inicio.svelte";
+<script>
+	import Inicio from './Components/Inicio.svelte';
+	import { iColegio,docente } from './Stores.js';
+	
 
+const valores = window.location.search;
+const urlParams = new URLSearchParams(valores);
+$docente = urlParams.get('docente');
+$iColegio=urlParams.get('icolegio');
 
 </script>
 

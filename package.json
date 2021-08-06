@@ -28,7 +28,6 @@
   },
   "dependencies": {
     "bootstrap": "^5.0.0-beta3",
-    "bootstrap-select": "^1.13.18",
     "moment": "^2.29.1",
     "sirv-cli": "^1.0.0",
     "sveltestrap": "^5.5.1",

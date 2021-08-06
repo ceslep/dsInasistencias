@@ -10,7 +10,7 @@
   let openMR=false;
   let estudianteResumen;
   const dispatch = createEventDispatcher();
-  //export let cargandoEstudiantes;
+  export let cargandoEstudiantes;
   const clickEstudiante = (estudiante) => {
     dispatch("dataEstudiante", {
       data: estudiante,
@@ -47,6 +47,8 @@
   const closeModal = (e) => {
     openMR = false;
   };
+
+  $:console.log(cargandoEstudiantes);
 </script>
 
 <div class="container-fluid d-flex justify-content-center flex-column pt-3">
@@ -83,10 +85,4 @@ on:close={closeModal}
 
 
 
-<style>
-  .gradiente {
-      background: linear-gradient(to right, #E2E2E2, #C9D6FF);
-  }
 
-  
-</style>

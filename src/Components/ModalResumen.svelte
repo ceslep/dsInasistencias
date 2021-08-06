@@ -7,18 +7,19 @@
         ModalFooter,
         ModalHeader,
         Table,
+        Tooltip,
     } from "sveltestrap";
     import { DoorClosed } from "svelte-bootstrap-icons";
     import { urlPhp, iColegio } from "../Stores";
     export let open = false;
     export let estudianteResumen;
     let inasistencias;
+    let totalInasistencias;
     let columnas;
     let filas;
-    let tabla = ["1"]["1"];
+    let datosResumen;
     const toggle = () => (open = !open);
 
-    $: console.log(tabla);
     const dispatch = createEventDispatcher();
     const closeModal = () => {
         dispatch("close", {
@@ -33,8 +34,9 @@
             headers: { "Content-Type": "application/json" },
             mode: "cors",
         });
-        inasistencias = await response.json();
-        console.log(inasistencias);
+        datosResumen = await response.json();
+        inasistencias = datosResumen.resumen;
+        totalInasistencias = datosResumen.totalInasistencias;
     };
 
     $: if (inasistencias) {
@@ -54,8 +56,47 @@
             return filas.indexOf(valor) === indice;
         });
     }
-    $: if (columnas) console.log(columnas);
-    $: if (filas) console.log(filas);
+
+    const valueOf = (materia, periodo) => {
+        let horas = inasistencias.filter((inasistencia) => {
+            return (
+                inasistencia.imateria === materia &&
+                inasistencia.periodo === periodo
+            );
+        });
+        if (horas.length > 0) return horas[0].horas;
+        else return "0";
+    };
+
+    const htmlInasistencia = (materia, periodo) => {
+        console.log(totalInasistencias);
+        let inasist = totalInasistencias.filter((inasistencia) => {
+            return (
+                inasistencia.imateria === materia &&
+                inasistencia.periodo === periodo
+            );
+        });
+        let html = "<table class='table'>";
+
+        inasist.forEach((inas) => {
+            html += `
+            <tr>
+                    <td class='text-light'>
+                        ${inas.fecha}
+                    </td>
+                    <td class='' style='color:yellow;'>
+                        ${inas.horas} Horas
+                    </td>
+                    <td class='text-light'>
+                        ${inas.excusa=="t"?"Excusa":"Sin excusa"}
+                    </td>
+            </tr>
+           `;
+        });
+        html += "</table>";
+
+        return html;
+    };
 </script>
 
 <Modal
@@ -71,13 +112,38 @@
     <ModalBody>
         <Table bordered hover>
             <thead>
-                <th>Materias</th>
+                <th class="text-center">Materias</th>
                 {#if columnas}
                     {#each columnas as periodo}
-                        <th>{periodo}</th>
+                        <th class="text-center text-success">{periodo}</th>
                     {/each}
                 {/if}
             </thead>
+            <tbody>
+                {#if filas}
+                    {#each filas as materia}
+                        <tr>
+                            <th scope="row">{materia}</th>
+                            {#each columnas as periodo}
+                                <td class="text-center"
+                                    ><a href="#!" id={materia + periodo}
+                                        >{valueOf(materia, periodo)}</a
+                                    >
+                                    <Tooltip
+                                        target={materia + periodo}
+                                        placement="right"
+                                    >
+                                        {@html htmlInasistencia(
+                                            materia,
+                                            periodo
+                                        )}
+                                    </Tooltip>
+                                </td>
+                            {/each}
+                        </tr>
+                    {/each}
+                {/if}
+            </tbody>
         </Table>
     </ModalBody>
     <ModalFooter>
