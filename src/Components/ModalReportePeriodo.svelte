@@ -1,75 +1,91 @@
 <script>
-    import { createEventDispatcher, afterUpdate, onMount } from "svelte";
-  import { urlPhp, iColegio } from "../Stores";
-  import {
-    Button,
-    Modal,
-    ModalBody,
-    ModalFooter,
-    ModalHeader,
-    Alert,
-    Input,
-    Spinner,
-     } from "sveltestrap";
-    </script>
+	import ModalInasistencia from './ModalInasistencia.svelte';
+    import { createEventDispatcher, afterUpdate, onMount, beforeUpdate } from "svelte";
+    import { urlPhp, iColegio } from "../Stores";
+    import {
+        Button,
+        Modal,
+        ModalBody,
+        ModalFooter,
+        ModalHeader,
+        Alert,
+        Input,
+        Spinner,
+        Table
+    } from "sveltestrap";
+    import { DoorClosed,Trash } from "svelte-bootstrap-icons";
+    export let openReporte;
+    export let inasistenciasMateria;
+    let inasistencias;
+    const toggle = () => (openReporte = !openReporte);
+    const dispatch = createEventDispatcher();
+    const closeModal = () => {
+        dispatch("close", {
+            data: "close",
+        });
+    };
+
+    beforeUpdate(()=>{
+        if (inasistenciasMateria)
+        inasistencias=inasistenciasMateria.map(inm=>{
+            return {"Fecha":inm.fecha,"Horas":inm.horas,"Excusa":inm.excusa!="null"?"Si":"No"}
+        });
+    });
+    const openingModal = async () => {
+       
+    };
+</script>
+
 <Modal
-    isOpen={open}
+    isOpen={openReporte}
     {toggle}
     class="modal-dialog modal-dialog-centered"
     on:close={closeModal}
-    on:opening={openingModal}
+    
 >
-    <ModalHeader class="bg-success p-2 text-white bg-opacity-10" {toggle}
-        >Resumen Inasistencias
+    <ModalHeader class="bg-secondary p-2 text-white bg-opacity-10" {toggle}
+        >Inasistencias 
     </ModalHeader>
-    <ModalBody>
+    <ModalBody class="bg-dark">
+       
+        {#if inasistencias}
         <Table bordered hover>
             <thead>
-                <th class="text-center">Materias</th>
-                {#if columnas}
-                    {#each columnas as periodo}
-                        <th class="text-center text-success">{periodo}</th>
+              
+                <tr>
+                    {#each Object.keys(inasistencias[0]) as itemInasistencia}
+                         <th class="text-info text-center">
+                            {itemInasistencia}
+                         </th>    
                     {/each}
-                    <th class="text-center text-primary">
-                        TOTAL
-                    </th>
-                {/if}
+                    <th class="text-danger text-center">
+                        Borrar
+                    </th>    
+                </tr>    
             </thead>
             <tbody>
-                {#if filas}
-                    {#each filas as materia}
-                        <tr>
-                            <th scope="row">{materia}</th>
-                            {#each columnas as periodo}
-                                <td class="text-center"
-                                    ><a href="#!" id={materia + periodo}
-                                        >{valueOf(materia, periodo)}</a
-                                    >
-                                    <Tooltip
-                                        target={materia + periodo}
-                                        placement="right"
-                                        title="<em>Tooltip</em> <u>with</u> <b>HTML</b>"
-                                    >
-                                        {@html htmlInasistencia(
-                                            materia,
-                                            periodo
-                                        )}
-                                    </Tooltip>
-                                </td>
-                            {/each}
-                            <td class="text-center text-dark">
-                                {Total(materia)}
-                            </td>
-                        </tr>
-                    {/each}
-                {/if}
+                {#each inasistencias as inasistencia}
+                    <tr>
+                        {#each Object.values(inasistencia) as itemInasistencia}
+                             <td class="text-light text-center align-middle">
+                                {itemInasistencia}
+                             </td>    
+                        {/each}
+                        <td class="text-center align-middle">
+                            <Button size="sm" color="danger">
+                                <Trash/>
+                            </Button>
+                        </td>
+                    </tr>    
+                {/each}    
             </tbody>
         </Table>
+        {/if}
     </ModalBody>
-    <ModalFooter>
-        <Button color="info" on:click={toggle}>
+    <ModalFooter class="bg-dark">
+        <Button color="success" on:click={toggle}>
             <DoorClosed />
-            Cerrar
+            
         </Button>
     </ModalFooter>
 </Modal>

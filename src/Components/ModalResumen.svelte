@@ -9,12 +9,16 @@
         Table,
         Tooltip,
     } from "sveltestrap";
-    import { DoorClosed,Trash } from "svelte-bootstrap-icons";
+    import { DoorClosed, Trash } from "svelte-bootstrap-icons";
     import { urlPhp, iColegio } from "../Stores";
+    import ModalReportePeriodo from "./ModalReportePeriodo.svelte";
+
     export let open = false;
+    let openReporte = false;
     export let estudianteResumen;
     let inasistencias;
     let totalInasistencias;
+    let inasistenciasMateria;
     let columnas;
     let filas;
     let datosResumen;
@@ -37,6 +41,10 @@
         datosResumen = await response.json();
         inasistencias = datosResumen.resumen;
         totalInasistencias = datosResumen.totalInasistencias;
+    };
+
+    const closeModalReporte = (e) => {
+        openReporte = false;
     };
 
     $: if (inasistencias) {
@@ -69,7 +77,7 @@
     };
 
     const htmlInasistencia = (materia, periodo) => {
-        console.log(totalInasistencias);
+      
         let inasist = totalInasistencias.filter((inasistencia) => {
             return (
                 inasistencia.imateria === materia &&
@@ -82,13 +90,15 @@
             html += `
             <tr>
                     <td class='text-light align-middle'>
-                        ${inas.fecha.substring(5,10)}
+                        ${inas.fecha.substring(5, 10)}
                     </td>
                     <td class='' style='color:yellow;'>
                         ${inas.horas} Horas
                     </td>
-                    <td class="${inas.excusa=='t'?'text-success':'text-light'}">
-                        ${inas.excusa=="t"?"Excusa":"Sin excusa"}
+                    <td class="${
+                        inas.excusa == "t" ? "text-success" : "text-light"
+                    }">
+                        ${inas.excusa == "t" ? "Excusa" : "Sin excusa"}
                     </td>
                     
             </tr>
@@ -99,18 +109,28 @@
         return html;
     };
 
-    const Total = (materia)=>{
-       return inasistencias.map(inasistencia=>{
-           if (inasistencia.imateria===materia){
-           if (inasistencia.horas){
-           return parseInt(inasistencia.horas);
-        }
-        }else return 0;
-        }).reduce((T,horas)=>{
-            return T+horas;
+    const Total = (materia) => {
+        return inasistencias
+            .map((inasistencia) => {
+                if (inasistencia.imateria === materia) {
+                    if (inasistencia.horas) {
+                        return parseInt(inasistencia.horas);
+                    }
+                } else return 0;
+            })
+            .reduce((T, horas) => {
+                return T + horas;
+            });
+    };
+
+    const openMR = (materia,periodo) => {
+        
+        inasistenciasMateria=totalInasistencias.filter(ti=>{
+            return ti.imateria===materia && ti.periodo===periodo;
         });
-      
-    }
+        console.log(inasistenciasMateria);
+        openReporte = true;
+    };
 </script>
 
 <Modal
@@ -131,9 +151,7 @@
                     {#each columnas as periodo}
                         <th class="text-center text-success">{periodo}</th>
                     {/each}
-                    <th class="text-center text-primary">
-                        TOTAL
-                    </th>
+                    <th class="text-center text-primary"> TOTAL </th>
                 {/if}
             </thead>
             <tbody>
@@ -142,10 +160,13 @@
                         <tr>
                             <th scope="row">{materia}</th>
                             {#each columnas as periodo}
-                                <td class="text-center"
-                                    ><a href="#!" id={materia + periodo}
-                                        >{valueOf(materia, periodo)}</a
-                                    >
+                                <td class="text-center">
+                                    <a
+                                        href="#!"
+                                        id={materia + periodo}
+                                        on:click|preventDefault={openMR(materia,periodo)}
+                                        >{valueOf(materia, periodo)}
+                                    </a>
                                     <Tooltip
                                         target={materia + periodo}
                                         placement="right"
@@ -175,4 +196,8 @@
     </ModalFooter>
 </Modal>
 
-<ModalReportePeriodo/>
+<ModalReportePeriodo
+    {openReporte}
+    on:close={closeModalReporte}
+    {inasistenciasMateria}
+/>
