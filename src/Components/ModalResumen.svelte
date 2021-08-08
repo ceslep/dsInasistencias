@@ -8,6 +8,7 @@
         ModalHeader,
         Table,
         Tooltip,
+        Spinner
     } from "sveltestrap";
     import { DoorClosed, Trash } from "svelte-bootstrap-icons";
     import { urlPhp, iColegio } from "../Stores";
@@ -22,6 +23,7 @@
     let columnas;
     let filas;
     let datosResumen;
+    let calculando=false;
     const toggle = () => (open = !open);
 
     const dispatch = createEventDispatcher();
@@ -32,6 +34,7 @@
     };
 
     const openingModal = async () => {
+        calculando=true;
         let response = await fetch($urlPhp + "obtenerInasistencias.php", {
             method: "POST",
             body: JSON.stringify(estudianteResumen),
@@ -41,11 +44,12 @@
         datosResumen = await response.json();
         inasistencias = datosResumen.resumen;
         totalInasistencias = datosResumen.totalInasistencias;
-    };
+        calculando=false;
+    }
 
     const closeModalReporte = (e) => {
         openReporte = false;
-    };
+    }
 
     $: if (inasistencias) {
         columnas = inasistencias.map((inasistencia) => {
@@ -74,7 +78,7 @@
         });
         if (horas.length > 0) return horas[0].horas;
         else return "0";
-    };
+    }
 
     const htmlInasistencia = (materia, periodo) => {
       
@@ -107,7 +111,7 @@
         html += "</table>";
 
         return html;
-    };
+    }
 
     const Total = (materia) => {
         return inasistencias
@@ -121,16 +125,15 @@
             .reduce((T, horas) => {
                 return T + horas;
             });
-    };
+    }
 
     const openMR = (materia,periodo) => {
-        
         inasistenciasMateria=totalInasistencias.filter(ti=>{
             return ti.imateria===materia && ti.periodo===periodo;
         });
-        console.log(inasistenciasMateria);
+        if (inasistenciasMateria.length>0)
         openReporte = true;
-    };
+    }
 </script>
 
 <Modal
@@ -144,6 +147,11 @@
         >Resumen Inasistencias
     </ModalHeader>
     <ModalBody>
+        {#if calculando}
+        <div class="d-flex justify-content-center">
+            <Spinner color="success" style="width: 3rem; height: 3rem;"/>
+        </div>
+        {/if}
         <Table bordered hover>
             <thead>
                 <th class="text-center">Materias</th>
@@ -156,7 +164,7 @@
             </thead>
             <tbody>
                 {#if filas}
-                    {#each filas as materia}
+                    {#each filas as materia,i}
                         <tr>
                             <th scope="row">{materia}</th>
                             {#each columnas as periodo}
@@ -183,6 +191,7 @@
                                 {Total(materia)}
                             </td>
                         </tr>
+                      
                     {/each}
                 {/if}
             </tbody>
