@@ -21,6 +21,7 @@
     const toggle = () => (openReporte = !openReporte);
     const dispatch = createEventDispatcher();
     const closeModal = () => {
+        inasistencias=[];
         dispatch("close", {
             data: {"action":"close","refresh":refresh},
         });

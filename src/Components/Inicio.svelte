@@ -5,6 +5,7 @@
   import ModalInasistencia from "./ModalInasistencia.svelte";
   import {ClipboardData,Eye} from "svelte-bootstrap-icons";
   import {Spinner} from "sveltestrap";
+  import Swal from "sweetalert2";
   let grados = [];
   let grupos = [];
   let estudiantes = [];
@@ -30,12 +31,19 @@
     estudiantes = [];
     cargandoGrados=true;
     let data;
+    try{
     let response = await fetch(
       `${$urlPhp}obtenerGrados.php?icolegio=${$iColegio}`
     );
     data = await response.json();
-    cargandoGrados=false;
     return data;
+    }catch(error){
+      console.log(error.name);
+      if (error.message.includes("fetch")) Swal.fire("Error de Conexión al servidor",$urlPhp);
+      return [];
+    }finally{
+      cargandoGrados=false;
+   }
   };
 
   const obtenerGrupos = async () => {

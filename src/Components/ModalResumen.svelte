@@ -24,10 +24,12 @@
     let filas;
     let datosResumen = [];
     let calculando = false;
+    let noexisten=false;
     const toggle = () => (open = !open);
 
     const dispatch = createEventDispatcher();
     const closeModal = () => {
+        
         dispatch("close", {
             data: "close",
         });
@@ -35,6 +37,9 @@
 
     const openingModal = async () => {
         calculando = true;
+        noexisten=false;
+        inasistencias=[];
+        totalInasistencias=[];
         let response = await fetch($urlPhp + "obtenerInasistencias.php", {
             method: "POST",
             body: JSON.stringify(estudianteResumen),
@@ -45,6 +50,7 @@
         inasistencias = datosResumen.resumen;
         totalInasistencias = datosResumen.totalInasistencias;
         calculando = false;
+        if (totalInasistencias.length==0) noexisten=true;
     };
 
     const closeModalReporte = (e) => {
@@ -77,8 +83,10 @@
                 inasistencia.imateria === materia &&
                 inasistencia.periodo === periodo
             );
+        }).map(inasistencia=>{
+            return parseInt(inasistencia.horas);
         });
-        if (horas.length > 0) return horas[0].horas;
+        if (horas.length > 0) return horas.reduce((total,hora)=>{return total+hora});
         else return "0";
     };
 
@@ -175,7 +183,6 @@
                                         <td class="text-center">
                                             <a
                                                 href="#!"
-                                                id={materia + periodo}
                                                 on:click|preventDefault={openMR(
                                                     materia,
                                                     periodo
@@ -192,7 +199,7 @@
                         {/if}
                     </tbody>
                 </Table>
-            {:else}
+            {:else if noexisten}
                 <Alert color="warning">
                     <h4 class="alert-heading text-capitalize">
                         No existen inasistencias
