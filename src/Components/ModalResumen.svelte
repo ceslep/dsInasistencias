@@ -7,8 +7,8 @@
         ModalFooter,
         ModalHeader,
         Table,
-        Tooltip,
-        Spinner
+        Alert,
+        Spinner,
     } from "sveltestrap";
     import { DoorClosed, Trash } from "svelte-bootstrap-icons";
     import { urlPhp, iColegio } from "../Stores";
@@ -22,8 +22,8 @@
     let inasistenciasMateria;
     let columnas;
     let filas;
-    let datosResumen;
-    let calculando=false;
+    let datosResumen = [];
+    let calculando = false;
     const toggle = () => (open = !open);
 
     const dispatch = createEventDispatcher();
@@ -34,7 +34,7 @@
     };
 
     const openingModal = async () => {
-        calculando=true;
+        calculando = true;
         let response = await fetch($urlPhp + "obtenerInasistencias.php", {
             method: "POST",
             body: JSON.stringify(estudianteResumen),
@@ -44,12 +44,14 @@
         datosResumen = await response.json();
         inasistencias = datosResumen.resumen;
         totalInasistencias = datosResumen.totalInasistencias;
-        calculando=false;
-    }
+        calculando = false;
+    };
 
     const closeModalReporte = (e) => {
         openReporte = false;
-    }
+        console.log(e.detail.data);
+        if (e.detail.data.refresh) openingModal();
+    };
 
     $: if (inasistencias) {
         columnas = inasistencias.map((inasistencia) => {
@@ -78,10 +80,9 @@
         });
         if (horas.length > 0) return horas[0].horas;
         else return "0";
-    }
+    };
 
     const htmlInasistencia = (materia, periodo) => {
-      
         let inasist = totalInasistencias.filter((inasistencia) => {
             return (
                 inasistencia.imateria === materia &&
@@ -111,7 +112,7 @@
         html += "</table>";
 
         return html;
-    }
+    };
 
     const Total = (materia) => {
         return inasistencias
@@ -125,15 +126,14 @@
             .reduce((T, horas) => {
                 return T + horas;
             });
-    }
+    };
 
-    const openMR = (materia,periodo) => {
-        inasistenciasMateria=totalInasistencias.filter(ti=>{
-            return ti.imateria===materia && ti.periodo===periodo;
+    const openMR = (materia, periodo) => {
+        inasistenciasMateria = totalInasistencias.filter((ti) => {
+            return ti.imateria === materia && ti.periodo === periodo;
         });
-        if (inasistenciasMateria.length>0)
-        openReporte = true;
-    }
+        if (inasistenciasMateria.length > 0) openReporte = true;
+    };
 </script>
 
 <Modal
@@ -148,54 +148,59 @@
     </ModalHeader>
     <ModalBody>
         {#if calculando}
-        <div class="d-flex justify-content-center">
-            <Spinner color="success" style="width: 3rem; height: 3rem;"/>
-        </div>
+            <div class="d-flex justify-content-center">
+                <Spinner color="success" style="width: 3rem; height: 3rem;" />
+            </div>
         {/if}
-        <Table bordered hover>
-            <thead>
-                <th class="text-center">Materias</th>
-                {#if columnas}
-                    {#each columnas as periodo}
-                        <th class="text-center text-success">{periodo}</th>
-                    {/each}
-                    <th class="text-center text-primary"> TOTAL </th>
-                {/if}
-            </thead>
-            <tbody>
-                {#if filas}
-                    {#each filas as materia,i}
-                        <tr>
-                            <th scope="row">{materia}</th>
+        {#if datosResumen.totalInasistencias}
+            {#if datosResumen.totalInasistencias.length > 0}
+                <Table bordered hover>
+                    <thead>
+                        <th class="text-center">Materias</th>
+                        {#if columnas}
                             {#each columnas as periodo}
-                                <td class="text-center">
-                                    <a
-                                        href="#!"
-                                        id={materia + periodo}
-                                        on:click|preventDefault={openMR(materia,periodo)}
-                                        >{valueOf(materia, periodo)}
-                                    </a>
-                                    <Tooltip
-                                        target={materia + periodo}
-                                        placement="right"
-                                        title="<em>Tooltip</em> <u>with</u> <b>HTML</b>"
-                                    >
-                                        {@html htmlInasistencia(
-                                            materia,
-                                            periodo
-                                        )}
-                                    </Tooltip>
-                                </td>
+                                <th class="text-center text-success"
+                                    >{periodo}</th
+                                >
                             {/each}
-                            <td class="text-center text-dark">
-                                {Total(materia)}
-                            </td>
-                        </tr>
-                      
-                    {/each}
-                {/if}
-            </tbody>
-        </Table>
+                            <th class="text-center text-primary"> TOTAL </th>
+                        {/if}
+                    </thead>
+                    <tbody>
+                        {#if filas}
+                            {#each filas as materia, i}
+                                <tr>
+                                    <th scope="row">{materia}</th>
+                                    {#each columnas as periodo}
+                                        <td class="text-center">
+                                            <a
+                                                href="#!"
+                                                id={materia + periodo}
+                                                on:click|preventDefault={openMR(
+                                                    materia,
+                                                    periodo
+                                                )}
+                                                >{valueOf(materia, periodo)}
+                                            </a>
+                                        </td>
+                                    {/each}
+                                    <td class="text-center text-dark">
+                                        {Total(materia)}
+                                    </td>
+                                </tr>
+                            {/each}
+                        {/if}
+                    </tbody>
+                </Table>
+            {:else}
+                <Alert color="warning">
+                    <h4 class="alert-heading text-capitalize">
+                        No existen inasistencias
+                    </h4>
+                    Para éste estudiante.
+                </Alert>
+            {/if}
+        {/if}
     </ModalBody>
     <ModalFooter>
         <Button color="info" on:click={toggle}>

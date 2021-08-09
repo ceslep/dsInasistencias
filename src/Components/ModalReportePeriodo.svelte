@@ -2,8 +2,6 @@
     import  Swal  from "sweetalert2";
     import {
         createEventDispatcher,
-        afterUpdate,
-        onMount,
         beforeUpdate,
     } from "svelte";
     import { urlPhp, iColegio } from "../Stores";
@@ -13,20 +11,18 @@
         ModalBody,
         ModalFooter,
         ModalHeader,
-        Alert,
-        Input,
-        Spinner,
         Table,
     } from "sveltestrap";
     import { DoorClosed, Trash } from "svelte-bootstrap-icons";
     export let openReporte;
     export let inasistenciasMateria;
     let inasistencias;
+    let refresh=false;
     const toggle = () => (openReporte = !openReporte);
     const dispatch = createEventDispatcher();
     const closeModal = () => {
         dispatch("close", {
-            data: "close",
+            data: {"action":"close","refresh":refresh},
         });
     };
 
@@ -41,9 +37,10 @@
                 };
             });
     });
-    const openingModal = async () => {};
+   
 
     const borrarInasistencia = async (inasistencia) => {
+        refresh=false;
         console.log(inasistencia);
         let result = await Swal.fire({
             title: "Está seguro?",
@@ -57,7 +54,21 @@
         });
         
             if (result.isConfirmed) {
-                Swal.fire("Deleted!", "Your file has been deleted.", "success");
+                let response=await fetch($urlPhp+"eliminarInasistencia.php",{
+                    method:"DELETE",
+                    body:JSON.stringify(inasistencia),
+                    headers:{"Content-Type":"application/json"},
+                    mode:"cors"
+                });
+                let info=await response.json();
+                if (info.estado=="ok"){
+                    inasistencias=inasistencias.filter(inas=>{
+                        return inas.id!=inasistencia.id;
+                    });
+                    refresh=true;
+                    Swal.fire("Borrada!", "Inasistencia Eliminada.", "success");
+
+                }
             }
             openReporte=false;
         
