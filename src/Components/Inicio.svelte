@@ -1,4 +1,5 @@
 <script>
+	import BarGraphics from './BarGraphics.svelte';
   import ListadoEstudiantes from "./ListadoEstudiantes.svelte";
   import { onMount } from "svelte";
   import { urlPhp, iColegio,docente } from "../Stores";
@@ -15,6 +16,7 @@
   let cargandoGrados=false;
   let cargando=false;
   let cargandoGrupos=false;
+  let repinas=false;
   let datosFiltrarEstudiantes = {
     igrado: "",
     igrupo: "",
@@ -82,6 +84,7 @@
     estudiantes = await response.json();
     cargandoEstudiantes = false;
     cargando=false;
+    repinas=false;
   };
 
   const estudianteClick = (e) => {
@@ -97,6 +100,12 @@
   $: validForm =
     datosFiltrarEstudiantes.igrado != "" &&
     datosFiltrarEstudiantes.igrupo != "";
+
+    const reporteInasistencias = ()=>{
+      cargandoEstudiantes=true;
+      repinas=true;
+      console.log("...");
+    }
 </script>
 
 <div class="d-flex justify-content-center">
@@ -158,7 +167,7 @@
               <button
                 class="btn btn-secondary  w-100"
                 type="button"
-                on:click={obtenerEstudiantes}><ClipboardData style="color:yellow;"/><span class="ms-2">Resumen</span></button
+                on:click={reporteInasistencias}><ClipboardData style="color:yellow;"/><span class="ms-2">Resumen</span></button
               >
             </div>
           </div>
@@ -181,3 +190,8 @@
   on:close={closeModal}
 />
 
+{#if repinas}
+  <BarGraphics
+  {datosFiltrarEstudiantes}
+  />
+{/if}
